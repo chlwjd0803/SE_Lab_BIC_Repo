@@ -4,6 +4,7 @@ defects4j/
 # 체크아웃한 프로젝트 임시 폴더 제외
 temp_*/
 checkout_*/
+lang_*/
 
 # 파이썬 가상환경 및 캐시
 __pycache__/
