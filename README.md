@@ -10,9 +10,13 @@
 ```bash
 # 1. 패키지 목록 업데이트 및 필수 빌드 도구 설치
 sudo apt update
-sudo apt install -y build-essential git curl wget unzip perl \
-                       libdbi-perl libdbd-csv-perl \
-                       python3 python3-pip
+
+sudo apt install -y build-essential git curl wget unzip zip perl \
+               libdbi-perl libdbd-csv-perl \
+               python3 python3-pip cpanminus tree
+
+# 가상환경일때 다음 명령어를 통해 안전한 경로임을 명시
+git config --global --add safe.directory /workspace/SE_Lab_BIC_Repo
 
 # 2. SDKMAN 설치 및 Java 설정
 curl -s "https://get.sdkman.io" | bash
@@ -20,8 +24,6 @@ source "$HOME/.sdkman/bin/sdkman-init.sh"
 
 # Java 11 (Temurin) 설치
 sdk install java 11.0.22-tem
-# Java 8 설치 (Defects4J 핵심 요구사항)
-sudo apt install -y openjdk-8-jdk
 
 # 설치 확인
 java -version
@@ -46,7 +48,15 @@ echo "export PATH=\$PATH:$(pwd)/framework/bin" >> ~/.bashrc
 source ~/.bashrc
 
 # 4. Ollama(LLM) 설치 및 모델 다운로드
+
+# 아래 명령어로 GPU와 연결됨을 반드시 확인하기
+nvidia-smi
+
+# 하드웨어 연결용
+apt update && apt install -y pciutils lshw
+
 curl -fsSL https://ollama.com/install.sh | sh
+ollama serve &
 ollama pull llama3:8b
 ollama run llama3:8b
 pip3 install ollama
