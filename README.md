@@ -24,9 +24,23 @@ source "$HOME/.sdkman/bin/sdkman-init.sh"
 
 # Java 11 (Temurin) 설치
 sdk install java 11.0.22-tem
+sdk use java 11.0.22-tem
 
 # 설치 확인
 java -version
+
+
+# 혹시나 Java 8 버전과의 호환성이 우려될경우
+sdk install java 8.0.402-tem
+sdk use java 8.0.402-tem
+
+
+# 시스템 기본값으로 고정 (터미널 다시 켜도 유지됨)
+sdk default java 8.0.402-tem
+
+
+# 자바 버전 토글
+
 ```
 
 ---
@@ -136,3 +150,70 @@ git blame -L 464,485 src/main/java/org/apache/commons/lang3/math/NumberUtils.jav
 ## 💡 연구 메모
 - **Java 버전**: 버전 충돌 시 `sudo update-alternatives --config java`로 8버전 선택.
 - **BIC 검증**: LLM이 지목한 커밋 해시로 `git checkout` 한 뒤 `defects4j test`를 돌려 버그가 재현되는지 확인.
+
+
+
+# 🚀 영남대 SE Lab BIC 연구용 도커 관리 치트시트
+
+
+### 1. 현재 상태 세이브 (Snapshot)
+#### 작업이 잘 돌아갈 때 현재 컨테이너(예시 3fe6ad420493)를 이미지로 저장합니다.
+docker commit 3fe6ad420493 my_research_env:backup_v1
+
+
+### 2. 저장된 이미지로 새 컨테이너 생성 (Restore / Clone)
+#### -v 옵션으로 호스트의 연구 폴더를 반드시 연결해야 파일이 보입니다.
+docker run -it --name research_java8_test \
+  --gpus all \
+  -v /data/cj/SE_Lab_BIC_Repo:/workspace/SE_Lab_BIC_Repo \
+  my_research_env:working_backup /bin/bash
+
+
+### 3. 컨테이너 일상 관리 (Start / Stop / Enter)
+# ------------------------------------------
+#### 중지된 컨테이너 다시 깨우기
+docker start research_java8_test
+
+#### 실행 중인 컨테이너 안으로 들어가기 (진입)
+docker exec -it research_java8_test /bin/bash
+
+#### 컨테이너 잠시 멈추기
+docker stop research_java8_test
+
+#### 현재 컨테이너들 상태 확인 (Up인지 Exited인지 확인)
+docker ps -a
+
+
+### 4. 삭제 및 청소 (Cleanup)
+### ------------------------------------------
+#### (주의!) 컨테이너를 삭제해도 -v로 연결된 호스트의 .py 파일들은 안전합니다.
+docker rm research_java8_test    # 컨테이너 삭제
+docker rmi my_research_env:backup_v1 # 이미지 삭제
+
+
+### 💡 팁: 컨테이너 안에서 나올 때 (Exit)
+### - exit 입력: 컨테이너가 중지됨 (다시 start 해줘야 함)
+### - Ctrl + P 누른 뒤 Ctrl + Q: 컨테이너를 끄지 않고 "연결만 끊고" 나옴
+
+
+
+# 해당 소스코드만 들고오기. 해당 부분은 컴파일과 빌드가 정상적으로 진행되었음
+
+### 1. 다시 깨끗하게 초기화
+git restore src/
+
+### 2. 메인과 테스트를 모두 '동일한' 과거 시점으로 복구
+git restore --source=5c2471f8 src/main/
+git restore --source=5c2471f8 src/test/
+
+### 3. 만약 아까처럼 TypeUtilsTest에서 제네릭 에러가 난다면, 
+#### 에러가 나는 그 파일만 '현재 성공하는 버전'으로 살짝 되돌립니다.
+git restore src/test/java/org/apache/commons/lang3/reflect/TypeUtilsTest.java
+
+### 4. 컴파일 시도
+defects4j compile
+
+### 5. 앞전에 발생했던 클래스 한정 테스트 시도
+#### 특정 클래스의 특정 메서드만 골라서 테스트합니다.
+#### 이 테스트가 '실패'해야 해당 커밋에 버그가 들어있다는 뜻입니다.
+defects4j test -t org.apache.commons.lang3.math.NumberUtilsTest::TestLang747
