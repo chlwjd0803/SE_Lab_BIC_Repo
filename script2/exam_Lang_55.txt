@@ -1,0 +1,17 @@
+
+==================== [BIC Detection Task] ====================
+Role: Expert Software Engineer
+Project: Lang (Bug ID: 55)
+
+[Task] Identify the Bug-Introducing Commit (BIC).
+[Commit History]
+[Error] This directory is not initialized as a git repo.
+
+[Format]
+BIC Hash: <hash>
+Reason: <brief reasoning>
+============================================================
+
+
+--- [GROUND TRUTH] ---
+8b070b8
