@@ -23,14 +23,19 @@ source "$HOME/.sdkman/bin/sdkman-init.sh"
 
 # Java 11 (Temurin) 설치 (D4J v3 실행용)
 sdk install java 11.0.22-tem
+
+# Java 8 사용 설정 변경
 sdk use java 11.0.22-tem
 
 # Java 8 설치 (과거 프로젝트 호환성 대비)
 sdk install java 8.0.402-tem
+
+# Java 8 사용 설정 변경
 sdk use java 8.0.402-tem
 
 # 시스템 기본값으로 고정 (터미널 다시 켜도 유지됨)
 sdk default java 11.0.22-tem
+sdk default java 8.0.402-tem
 ```
 
 ---
@@ -43,6 +48,7 @@ cd ~/llmszz_v1
 
 # 2. Defects4J 저장소 클론 및 설치
 git clone https://github.com/rjust/defects4j.git
+git clone https://github.com/rjust/defects4j.git -b v2.0.0
 cd defects4j
 sudo cpanm --installdeps .
 ./init.sh
@@ -69,6 +75,7 @@ pip3 install ollama
 ## 3. 프로젝트 버전 관리 (Buggy vs Fixed)
 
 BIC 탐지를 위해 버그가 있는 상태(`b`)와 고쳐진 상태(`f`)를 각각 체크아웃하여 비교하는 과정이 필수적입니다.
+아래 명령어는 1 버전의 체크아웃 예시이며 실제로 다른 넘버링이나 lang말고 다른 버전도 존재합니다.
 
 ### 3.1 버전별 체크아웃 방법
 ```bash
@@ -80,6 +87,7 @@ defects4j checkout -p Lang -v 1b -w ./lang_1_buggy
 
 # Lang 1번 버그의 Fixed 버전(1f) 가져오기: 정답 비교용
 defects4j checkout -p Lang -v 1f -w ./lang_1_fixed
+
 ```
 
 ### 3.2 버전 비교 요약
@@ -87,10 +95,20 @@ defects4j checkout -p Lang -v 1f -w ./lang_1_fixed
 | :--- | :--- | :--- |
 | **상태** | 버그 포함 (테스트 실패) | 버그 수정됨 (테스트 통과) |
 | **주요 용도** | `git blame` 실행 및 BIC 추적 | 수정 패치(정답) 확인 및 LLM 컨텍스트 |
+---
+
+### 3.3 기본 명령어
+
+```bash
+defects4j compile
+defects4j test
+defects4j coverage
+```
+
 
 ---
 
-## 4. 버그 분석 및 비교 방법 (추적의 핵심)
+## 4. 버그 분석 및 비교 방법 (추적의 핵심) - 임시 폐기
 
 ### 방법 1: `diff`를 이용한 코드 차이점 분석
 ```bash
@@ -159,6 +177,11 @@ docker stop research_java8_test
 * **환경 변수**: 버전 충돌 시 `sudo update-alternatives --config java` 활용.
 
 ---
+
+## SE Lab 연구 일지 (2026-01-28)
+
+
+
 
 ## 📝 SE Lab 연구 일지 (2026-01-19)
 
